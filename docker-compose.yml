@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  ollamac:
+    image: ollama/ollama
+    container_name: ollamac
+    volumes:
+      - D:\Programs\Ollama\Models:/Models
+      - ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_MODELS=/Models
+    restart: unless-stopped
+    networks:
+      - ottobot_network
+
+  ottobot_ui_app:
+    image: ucefk/ottobot-ui-app:0.1.2
+    container_name: ottobot_ui
+    ports:
+      - "8501:8501"
+    environment:
+      - MODEL_SERVICE=ollamac
+    restart: unless-stopped
+    networks:
+      - ottobot_network
+
+networks:
+  ottobot_network:
+    driver: bridge
+
+volumes:
+  ollama:
+  models:

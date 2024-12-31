@@ -1,0 +1,18 @@
+# POST http://localhost:8883/predict
+# Content-Type: application/json
+
+# {
+#     "question": "Hello. Generate a hello world program in python."
+# }
+
+# GET http://localhost:8883/status
+
+# curl -X POST http://localhost:11434/api/generate -H "Content-Type: application/json" -d '{"model": "qwen2:0.5b","prompt": "Give me an introduction to computer science."}'
+POST http://localhost:59300/api/generate
+Content-Type: application/json
+
+{
+    "model": "qwen2:0.5b",
+    "prompt": "Give me an example of a kubernetes pod manifest.",
+    "stream": false
+}

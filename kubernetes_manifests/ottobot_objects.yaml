@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollamac
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollamac
+  template:
+    metadata:
+      labels:
+        app: ollamac
+    spec:
+      containers:
+      - name: ollamac
+        image: ollama/ollama
+        ports:
+        - containerPort: 11434
+        # env:
+        # - name: OLLAMA_MODELS
+        #   value: "/Models"
+        resources:
+          limits:
+            cpu: "0.2"
+            memory: "256Mi"
+        volumeMounts:
+        - name: models-volume
+          mountPath: /root/.ollama/models
+        - name: ollama-volume
+          mountPath: /root/.ollama
+      volumes:
+      - name: models-volume
+        hostPath:
+          path: "D:\\Programs\\Ollama\\models"
+      - name: ollama-volume
+        persistentVolumeClaim:
+          claimName: ollama-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollamac
+spec:
+  selector:
+    app: ollamac
+  ports:
+  - protocol: TCP
+    port: 11434
+    targetPort: 11434
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ottobot-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ottobot-ui
+  template:
+    metadata:
+      labels:
+        app: ottobot-ui
+    spec:
+      containers:
+      - name: ottobot-ui
+        image: ucefk/ottobot-ui-app:0.1.2
+        ports:
+        - containerPort: 8501
+        env:
+        - name: MODEL_SERVICE
+          value: "ollamac"
+        resources:
+          limits:
+            cpu: "0.2"
+            memory: "256Mi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ottobot-ui
+spec:
+  selector:
+    app: ottobot-ui
+  ports:
+  - protocol: TCP
+    port: 8501
+    targetPort: 8501
+# k exec -it ollamac-5f99fbff8c-5lgw8 -- /bin/bash
+# k exec -it ottobot-ui-675c9cc7b9-zgp28 -- /bin/bash
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ollama-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "D:\\Programs\\Ollama\\models"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

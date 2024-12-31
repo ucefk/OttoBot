@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ottobot-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ottobot-ui
+  template:
+    metadata:
+      labels:
+        app: ottobot-ui
+    spec:
+      containers:
+      - name: ottobot-ui
+        image: ucefk/ottobot-ui-app:0.1.2
+        ports:
+        - containerPort: 8501
+        env:
+        - name: MODEL_SERVICE
+          value: "ollamac"
+        # resources:
+        #   limits:
+        #     cpu: "0.7"
+        #     memory: "256Mi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ottobot-ui
+spec:
+  selector:
+    app: ottobot-ui
+  ports:
+  - protocol: TCP
+    port: 8501
+    targetPort: 8501
+  type: NodePort
